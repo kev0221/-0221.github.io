@@ -1,0 +1,41 @@
+name: Deploy MkDocs Blog to GitHub Pages
+
+# 触发条件：main分支有代码提交时自动运行
+on:
+  push:
+    branches: [ main ]
+
+# 权限配置：允许读写仓库、部署Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1.拉取仓库全部代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2.安装Python环境（MkDocs基于Python）
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3.安装MkDocs依赖
+      - name: Install MkDocs
+        run: pip install mkdocs mkdocs-material
+
+      # 4.构建静态网页（生成site文件夹）
+      - name: Build static site
+        run: mkdocs build
+
+      # 5.部署构建产物到GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
